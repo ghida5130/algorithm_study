@@ -2,18 +2,21 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
+	static int[] visited;
+	static int[] visitedDepth;
+	static ArrayDeque<Pos> queue;
 	public static void main(String[] args) throws NumberFormatException, IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		int N = Integer.parseInt(st.nextToken());		// 수빈 위치
 		int K = Integer.parseInt(st.nextToken());		// 동생 위치
 
-		int[] visited = new int[100001];
-		int[] visitedDepth = new int[100001];
+		visited = new int[100001];
+		visitedDepth = new int[100001];
 		int min = Integer.MAX_VALUE;
 		int count = 0;
 
-		ArrayDeque<Pos> queue = new ArrayDeque<>();
+		queue = new ArrayDeque<>();
 		queue.addLast(new Pos(N, 0));
 		visited[N] = 1;
 
@@ -34,48 +37,26 @@ public class Main {
 				}
 			}
 
-			if(nextVal <= 100000) {
-				if(visited[nextVal] == 0) {
-					visited[nextVal] = 1;
-					visitedDepth[nextVal] = nowDepth + 1;
-					queue.addLast(new Pos(nextVal, nowDepth + 1));
-				} else {
-					if (visitedDepth[nextVal] >= nowDepth + 1) {
-						visitedDepth[nextVal] = nowDepth + 1;
-						queue.addLast(new Pos(nextVal, nowDepth + 1));
-					}
-				}
-			}
-			
-			if(prevVal >= 0) {
-				if(visited[prevVal] == 0) {
-					visited[prevVal] = 1;
-					visitedDepth[prevVal] = nowDepth + 1;
-					queue.addLast(new Pos(prevVal, nowDepth + 1));
-				} else {
-					if (visitedDepth[prevVal] >= nowDepth + 1) {
-						visitedDepth[prevVal] = nowDepth + 1;
-						queue.addLast(new Pos(prevVal, nowDepth + 1));
-					}
-				}
-			}
-
-			if(mulVal <= 100000) {
-				if(visited[mulVal] == 0) {
-					visited[mulVal] = 1;
-					visitedDepth[mulVal] = nowDepth + 1;
-					queue.addLast(new Pos(mulVal, nowDepth + 1));
-				} else {
-					if (visitedDepth[mulVal] >= nowDepth + 1) {
-						visitedDepth[mulVal] = nowDepth + 1;
-						queue.addLast(new Pos(mulVal, nowDepth + 1));
-					}
-				}
-			}
+			if(nextVal <= 100000) calc(nextVal, nowDepth);
+			if(prevVal >= 0) calc(prevVal, nowDepth);
+			if(mulVal <= 100000) calc(mulVal, nowDepth);
 		}
 
 		System.out.println(min);
 		System.out.println(count);
+	}
+
+	static void calc(int value, int depth) {
+		if(visited[value] == 0) {
+			visited[value] = 1;
+			visitedDepth[value] = depth + 1;
+			queue.addLast(new Pos(value, depth + 1));
+		} else {
+			if (visitedDepth[value] >= depth + 1) {
+				visitedDepth[value] = depth + 1;
+				queue.addLast(new Pos(value, depth + 1));
+			}
+		}
 	}
 
 	static class Pos {
