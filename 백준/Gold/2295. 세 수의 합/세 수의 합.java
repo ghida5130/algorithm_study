@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
+    // x+y+z=k 에서 x+y=k-z 로 풀이했다.
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int N = Integer.parseInt(br.readLine());
@@ -25,9 +26,11 @@ public class Main {
 
         T:for(int i = N-1;i>=0;i--) {
             for(int j = N-1;j>=0;j--) {
-                if(arr[i] <= arr[j]) continue;
+                // k가 z보다 크거나 같을경우 의미가 없으므로 continue 
                 int left = 0;
                 int right = N*N;
+
+                // k-z값을 찾기위한 이분탐색
                 while(left <= right) {
                     int mid = left + (right - left) / 2;
                     int now = tempArr[mid];
