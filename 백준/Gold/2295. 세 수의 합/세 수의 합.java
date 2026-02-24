@@ -25,21 +25,19 @@ public class Main {
 
         T:for(int i = N-1;i>=0;i--) {
             for(int j = N-1;j>=0;j--) {
-                if(arr[i] == arr[j]) continue;
+                if(arr[i] <= arr[j]) continue;
                 int left = 0;
                 int right = N*N;
                 while(left <= right) {
                     int mid = left + (right - left) / 2;
-                    if(tempArr[mid] == arr[i] - arr[j]) {
+                    int now = tempArr[mid];
+                    int diff = arr[i] - arr[j];
+                    if(now == diff) {
                         answer = arr[i];
                         break T;
                     }
-                    if(tempArr[mid] > arr[i] - arr[j]) {
-                        right = mid - 1;
-                    }
-                    if(tempArr[mid] < arr[i] - arr[j]) {
-                        left = mid + 1;
-                    }
+                    if(now > diff) right = mid - 1;
+                    if(now < diff) left = mid + 1;
                 }
             }
         }
