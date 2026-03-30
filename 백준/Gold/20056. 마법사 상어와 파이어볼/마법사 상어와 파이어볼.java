@@ -25,74 +25,69 @@ public class Main {
         }
 
         for(int z = 0;z<K;z++) {
-            // 1. 각 파이어볼을 순차적으로 이동한다. 이때 count 배열에 값을 누적한다.
-            int[][] count = new int[N][N];
-            for(Fireball f : fireballs) {
-                int nextR = f.r;
-                int nextC = f.c;
-                for(int j = 0;j<f.speed;j++) {
-                    nextR = nextR + dr[f.dir];
-                    nextC = nextC + dc[f.dir];
-
-                    // 격자를 빠져나간경우 반대편으로 이동
-                    if(nextR < 0) nextR = N-1;
-                    if(nextC < 0) nextC = N-1;
-                    if(nextR >= N) nextR = 0;
-                    if(nextC >= N) nextC = 0;
+            // 1. 파이어볼 이동후의 개수를 확인하기위한 count 이차원 배열
+            List<Fireball>[][] board = new ArrayList[N][N];
+            for(int i = 0; i < N; i++) {
+                for(int j = 0; j < N; j++) {
+                    board[i][j] = new ArrayList<>();
                 }
+            }
+            
+            // 2. 각 파이어볼 이동하여 board에 추가
+            for(Fireball f : fireballs) {
+                int move = f.speed % N;
+                int nextR = (f.r + dr[f.dir] * move) % N;
+                int nextC = (f.c + dc[f.dir] * move) % N;
 
-                f.r = nextR;
-                f.c = nextC;
-                count[f.r][f.c]++;
+                if(nextR < 0) nextR += N;
+                if(nextC < 0) nextC += N;
+
+                board[nextR][nextC].add(new Fireball(nextR, nextC, f.w, f.speed, f.dir));
             }
 
             // 2. count 배열에서 2이상인 위치에 대하여 연산한다.
-            for(int i = 0;i<N;i++) {
-                for(int j = 0;j<N;j++) {
-                    if(count[i][j] > 1) {
-                        int sumW = 0;
-                        int sumS = 0;
-                        int total = 0;
-                        boolean isFirst = true;
-                        boolean isFirstOdd = false;
-                        boolean isParity = true;
-                        Stack<Integer> tempList = new Stack<>();
+            List<Fireball> nextFireballs = new ArrayList<>();
 
-                        for(int k = 0;k<fireballs.size();k++) {
-                            Fireball f = fireballs.get(k);
-                            if(f.r == i && f.c == j) {
-                                total++;
-                                tempList.push(k);
-                                sumW += f.w;
-                                sumS += f.speed;
-                                if(isFirst) {
-                                    isFirst = false;
-                                    if(f.dir % 2 != 0) isFirstOdd = true;
-                                } else if (isParity == true) {
-                                    if(f.dir % 2 != 0 && isFirstOdd == false) isParity = false;
-                                    if(f.dir % 2 == 0 && isFirstOdd == true) isParity = false;
-                                }
-                            }
-                        }
+            for(int i = 0; i < N; i++) {
+                for(int j = 0; j < N; j++) {
+                    int size = board[i][j].size();
 
-                        sumW /= 5;
-                        sumS /= total;
+                    // 해당 칸에 하나도 없을 경우에 continue
+                    if(size == 0) continue;
 
-                        while(!tempList.isEmpty()) {
-                            int nowIdx = tempList.pop();
-                            fireballs.remove(nowIdx);
-                        }
+                    // 해당 칸에 한개만 있을경우 새 리스트에 추가하고 continue
+                    if(size == 1) {
+                        nextFireballs.add(board[i][j].get(0));
+                        continue;
+                    }
 
-                        if(sumW != 0) {
-                            for(int k = 0;k<8;k+=2) {
-                                int dir = k;
-                                if(!isParity) dir+=1;
-                                fireballs.add(new Fireball(i, j, sumW, sumS, dir));
-                            }
-                        }
+                    // 2개 이상일 경우 연산 수행
+                    int sumW = 0;
+                    int sumS = 0;
+                    boolean allEven = true;
+                    boolean allOdd = true;
+
+                    for(Fireball f : board[i][j]) {
+                        sumW += f.w;
+                        sumS += f.speed;
+
+                        if(f.dir % 2 == 0) allOdd = false;
+                        else allEven = false;
+                    }
+
+                    // 합친 질량을 계산하고 질량이 0일경우 추가를 생략
+                    int newW = sumW / 5;
+                    if(newW == 0) continue;
+                    int newS = sumS / size;
+                    int startDir = (allEven || allOdd) ? 0 : 1;
+                    for(int d = startDir; d < 8; d += 2) {
+                        nextFireballs.add(new Fireball(i, j, newW, newS, d));
                     }
                 }
             }
+
+            // 새 리스트로 갱신
+            fireballs = nextFireballs;
         }
 
         int answer = 0;
